@@ -7,7 +7,10 @@ import os
 class YWeather(object):
     def __init__(self):
         self.dir = os.getcwd()
-        self.codes = self.readDict(self.dir+'/yahoo_weather/codes.csv')
+        if '/yahoo_weather' not in self.dir:
+            self.codes = self.readDict(self.dir+'/yahoo_weather/codes.csv')
+        else:
+            self.codes = self.readDict(self.dir+'/codes.csv')
 
     def translate_code(self, code):
         return self.codes[code]
@@ -19,22 +22,24 @@ class YWeather(object):
         data = dict()
         #Pull any useful information out of the xml
         try:
+            for i in range(0, 4):
+                data['day'+str(i)] = root[0][12][i+7].attrib
+                data['day'+str(i)]['conditions']= self.translate_code(data['day'+str(i)]['code'])
             data['language'] = root[0][3].text
             data['location'] = root[0][6].attrib
             data['units'] = root[0][7].attrib
-            data['day0_wind'] = root[0][8].attrib
-            data['day0_atmosphere'] = root[0][9].attrib
-            data['day0_astronomy'] = root[0][10].attrib
-            
+            data['day0']['wind'] = root[0][8].attrib
+            data['day0']['atmosphere'] = root[0][9].attrib
+            data['day0']['astronomy'] = root[0][10].attrib
+            data['day0']['current_conditions'] = root[0][12][5].attrib
+                 
             data['location_lat'] = root[0][12][1].text
             data['location_long'] = root[0][12][2].text
             data['yahoo_link'] = root[0][12][3].text
             data['pubDate'] = root[0][12][4].text
-            data['day0_conditions'] = root[0][12][5].attrib
+            
             #Get forecast data, today being day0
-            for i in range(0, 4):
-                data['day'+str(i)+'_forecast'] = root[0][12][i+7].attrib
-                data['day'+str(i)+'_forecast']['conditions']= self.translate_code(data['day'+str(i)+'_forecast']['code'])
+            
         except IndexError:
             print("WOEID: " + str(woeid) + " Is not a valid WOEID")
         
@@ -60,4 +65,4 @@ class YWeather(object):
         return root
 
 
-#data = YWeather().weather_data(6, 'c')
+data = YWeather().weather_data(6, 'c')
