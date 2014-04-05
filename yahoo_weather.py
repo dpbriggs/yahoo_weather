@@ -5,16 +5,6 @@ import os
 
 
 class YWeather(object):
-    def __init__(self):
-        self.dir = os.getcwd()
-        if '/yahoo_weather' not in self.dir:
-            self.codes = self.readDict(self.dir+'/yahoo_weather/codes.csv')
-        else:
-            self.codes = self.readDict(self.dir+'/codes.csv')
-
-    def translate_code(self, code):
-        return self.codes[code]
-
     def weather_data(self, woeid, unit):
         url = 'http://weather.yahooapis.com/forecastrss?w=' + str(woeid) + '&u=' + unit
         #print(url)
@@ -24,7 +14,7 @@ class YWeather(object):
         try:
             for i in range(0, 4):
                 data['day'+str(i)] = root[0][12][i+7].attrib
-                data['day'+str(i)]['conditions']= self.translate_code(data['day'+str(i)]['code'])
+                #data['day'+str(i)]['conditions']= self.translate_code(data['day'+str(i)]['code'])
             data['language'] = root[0][3].text
             data['location'] = root[0][6].attrib
             data['units'] = root[0][7].attrib
@@ -32,7 +22,7 @@ class YWeather(object):
             data['day0']['atmosphere'] = root[0][9].attrib
             data['day0']['astronomy'] = root[0][10].attrib
             data['day0']['current_conditions'] = root[0][12][5].attrib
-                 
+            
             data['location_lat'] = root[0][12][1].text
             data['location_long'] = root[0][12][2].text
             data['yahoo_link'] = root[0][12][3].text
@@ -44,15 +34,6 @@ class YWeather(object):
             print("WOEID: " + str(woeid) + " Is not a valid WOEID")
         
         return data
-
-    def readDict(self, file):
-        h = []
-        with open(file, 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if row != []:
-                    h.append(row)
-        return dict(h)
         
     def returnroot(self, url):
         try:
